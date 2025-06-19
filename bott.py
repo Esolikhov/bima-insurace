@@ -12,7 +12,7 @@ from attestation import (
     STATE_ATT_QUESTION, STATE_INTERVIEW
 )
 
-from admin import is_admin, get_all_interviews, get_interviews_file, get_active_users
+from admin import is_admin, get_all_interviews, get_interviews_file, get_active_users, reset_db
 
 TOKEN = '7785563549:AAG9MXHaIaGLGwAtLaScrOO-_1q7DUAG-Gk'
 DB_PATH = "insurancebot.db"
@@ -192,6 +192,16 @@ async def admin_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     await update.message.reply_text(get_active_users())
 
+# --- СБРОС БАЗЫ ДАННЫХ ---
+
+async def admin_reset_db(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if not is_admin(user_id):
+        await update.message.reply_text("Доступ запрещён.")
+        return
+    msg = reset_db()
+    await update.message.reply_text(msg)
+
 # --- КОНЕЦ АДМИН БЛОКА ---
 
 def main():
@@ -202,6 +212,7 @@ def main():
     application.add_handler(CommandHandler("admin_interviews", admin_interviews))
     application.add_handler(CommandHandler("admin_file", admin_file))
     application.add_handler(CommandHandler("admin_users", admin_users))
+    application.add_handler(CommandHandler("admin_reset_db", admin_reset_db))  # <-- новый обработчик
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     application.run_polling()
 
