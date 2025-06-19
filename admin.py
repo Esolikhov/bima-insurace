@@ -1,3 +1,4 @@
+import os
 import sqlite3
 
 # Укажите здесь свой реальный Telegram ID!
@@ -7,6 +8,17 @@ DB_PATH = "insurancebot.db"
 
 def is_admin(user_id):
     return user_id in ADMIN_IDS
+
+def reset_db():
+    """
+    Удаляет файл базы данных insurancebot.db.
+    При следующем запуске бота база пересоздастся автоматически (db_init()).
+    """
+    if os.path.exists(DB_PATH):
+        os.remove(DB_PATH)
+        return "База данных удалена. Она пересоздастся при следующем запуске."
+    else:
+        return "Файл базы данных не найден."
 
 def get_all_interviews():
     try:
