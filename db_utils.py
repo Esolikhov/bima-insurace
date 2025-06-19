@@ -3,6 +3,14 @@ from datetime import date
 
 DB_PATH = "insurancebot.db"
 
+# Список уроков (можно расширить)
+DEFAULT_MATERIALS = [
+    (1, 'text', 'Урок 1. Введение в страхование: что это такое и зачем нужно?', None, None),
+    (2, 'text', 'Урок 2. Основные виды страхования. Подробнее по ссылке.', None, 'https://example.com/insurance'),
+    (3, 'text', 'Урок 3. Основные виды страхования. Подробнее по ссылке.', None, 'https://ru.wikisource.org/wiki/%D0%97%D0%B0%D0%BA%D0%BE%D0%BD_%D0%A0%D0%B5%D1%81%D0%BF%D1%83%D0%B1%D0%BB%D0%B8%D0%BA%D0%B8_%D0%A2%D0%B0%D0%B4%D0%B6%D0%B8%D0%BA%D0%B8%D1%81%D1%82%D0%B0%D0%BD_%22%D0%9E_%D1%81%D1%82%D1%80%D0%B0%D1%85%D0%BE%D0%B2%D0%BE%D0%B9_%D0%B4%D0%B5%D1%8F%D1%82%D0%B5%D0%BB%D1%8C%D0%BD%D0%BE%D1%81%D1%82%D0%B8%22'),
+    # Добавьте свои уроки ниже!
+]
+
 def db_init():
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
@@ -25,6 +33,13 @@ def db_init():
             current_lesson INTEGER DEFAULT 1
         )
     """)
+    # Автоматически добавляем уроки, если их нет
+    cur.execute("SELECT COUNT(*) FROM materials")
+    if cur.fetchone()[0] == 0:
+        cur.executemany(
+            "INSERT INTO materials (day_number, type, text, file_paths, link) VALUES (?, ?, ?, ?, ?)",
+            DEFAULT_MATERIALS
+        )
     con.commit()
     con.close()
 
@@ -92,8 +107,4 @@ def get_lessons_count():
 
 if __name__ == '__main__':
     db_init()
-    # Добавьте материалы один раз, если ещё не добавляли
-    add_material(1, 'text', 'Урок 1. Введение в страхование: что это такое и зачем нужно?', None, None)
-    add_material(2, 'text', 'Урок 2. Основные виды страхования. Подробнее по ссылке.', None, 'https://example.com/insurance')
-    add_material(3, 'text', 'Урок 3. Основные виды страхования. Подробнее по ссылке.', None,'https://ru.wikisource.org/wiki/%D0%97%D0%B0%D0%BA%D0%BE%D0%BD_%D0%A0%D0%B5%D1%81%D0%BF%D1%83%D0%B1%D0%BB%D0%B8%D0%BA%D0%B8_%D0%A2%D0%B0%D0%B4%D0%B6%D0%B8%D0%BA%D0%B8%D1%81%D1%82%D0%B0%D0%BD_%22%D0%9E_%D1%81%D1%82%D1%80%D0%B0%D1%85%D0%BE%D0%B2%D0%BE%D0%B9_%D0%B4%D0%B5%D1%8F%D1%82%D0%B5%D0%BB%D1%8C%D0%BD%D0%BE%D1%81%D1%82%D0%B8%22')
-    print("Материалы добавлены!")
+    print("База и уроки инициализированы автоматически.")
