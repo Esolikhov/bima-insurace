@@ -154,13 +154,14 @@ async def reset_progress(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = update.effective_user.id
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
-    cur.execute("UPDATE users SET current_lesson=1 WHERE telegram_id=?", (telegram_id,))
+    # Полное удаление пользователя!
+    cur.execute("DELETE FROM users WHERE telegram_id=?", (telegram_id,))
     con.commit()
     con.close()
     if telegram_id in context.user_data:
         del context.user_data[telegram_id]
     await update.message.reply_text(
-        "Ваш прогресс сброшен. Вы можете начать обучение заново! Используйте кнопку 'Получить урок'.",
+        "Ваш профиль полностью удалён. Чтобы продолжить обучение, зарегистрируйтесь заново — введите имя.",
         reply_markup=menu_markup
     )
 
@@ -212,7 +213,7 @@ def main():
     application.add_handler(CommandHandler("admin_interviews", admin_interviews))
     application.add_handler(CommandHandler("admin_file", admin_file))
     application.add_handler(CommandHandler("admin_users", admin_users))
-    application.add_handler(CommandHandler("admin_reset_db", admin_reset_db))  # <-- новый обработчик
+    application.add_handler(CommandHandler("admin_reset_db", admin_reset_db))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     application.run_polling()
 
